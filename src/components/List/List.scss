@@ -1,0 +1,66 @@
+.list {
+    $self: &;
+    margin-bottom: 30px;
+
+    &__add-button {
+        svg {
+            path {
+                stroke: grey;
+            }
+        }
+        span {
+            color: grey;
+        }
+
+        &:hover {
+            cursor: pointer;
+            svg {
+                path {
+                    stroke: black;
+                }
+            }
+            span {
+                color: black;
+            }
+        }
+    }
+
+    li {
+        display: flex;
+        align-items: center;
+        padding: 10px 0px 10px 12px;
+        margin-bottom: 5px;
+
+        &:hover #{$self}__remove-icon {
+            opacity: 0.3;
+        }
+
+        #{$self}__remove-icon {
+            opacity: 0;
+
+            &:hover {
+                opacity: 0.8;
+                cursor: pointer;
+            }
+        }
+
+        span {
+            flex: 1;
+        }
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        &.active {
+            background: #FFFFFF;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        i {
+            margin-right: 10px;
+        }
+    }
+}
