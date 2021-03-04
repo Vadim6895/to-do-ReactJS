@@ -1,21 +1,46 @@
-import List from './components/List/List.jsx';
-import React, { useState } from 'react';
-import AddButtonList from './components/AddButtonList/AddButtonList.jsx'
-import Tasks from './components/tasks/tasks.jsx'
+import React, { useState, useEffect } from 'react';
+import { List, AddButtonList, Tasks } from './components';
+import axios from 'axios';
 
-import mock from './mock.json'
 
 function App() {
-    let listsWithColors = mock.lists.map(item => {
-        item.color = mock.colors.filter(color => color.id === item.colorId)[0].name;
-        return item;
-    })
-    const [lists, setLists] = useState(listsWithColors);
+    const [lists, setLists] = useState(null);
+    const [colors, setColors] = useState(null);
+    const [activeItem, setActiveItem] = useState(null);
 
     const onAddList = (obj) => {
         const newList = [...lists, obj];
         setLists(newList)
     }
+
+    const onAddTask = (listId, taskObj) => {
+        const newList = lists.map(item => {
+            if (item.id === listId) {
+                item.tasks = [...item.tasks, taskObj];
+            }
+            return item;
+        })
+        setLists(newList);
+    }
+
+    const onEditListTitle = (id, title) => {
+        const newList = lists.map(item => {
+            if (item.id === id) {
+                item.name =title;
+            }
+            return item;
+        });
+        setLists(newList);
+    }
+
+    useEffect(() => {
+        axios.get('http://localhost:3001/lists?_expand=color&_embed=tasks').then(({ data }) => {
+            setLists(data);
+        });
+        axios.get('http://localhost:3001/colors').then(({ data }) => {
+            setColors(data);
+        });
+    }, [])
 
     return (
         <div className="todo">
@@ -31,36 +56,29 @@ function App() {
                         }
                     ]}
                 />
+                {lists ? (
                 <List
                     items={lists}
                     isRemovable
-                    onRemove={(list) => {}}
-                />
-                <AddButtonList onAdd={onAddList} colors={mock.colors}/>
+                    onRemove={id => {
+                        const newLists = lists.filter(item => item.id !== id);
+                        setLists(newLists);
+                    }}
+                    onClickItem={item => {
+                        setActiveItem(item);
+                    }}
+                    activeItem={activeItem}
+                />) : (
+                    'Загрузка...'
+                )}
+                <AddButtonList onAdd={onAddList} colors={colors}/>
             </div>
-            <Tasks />
+            <div
+                className="todo__tasks">
+                {lists && activeItem && <Tasks list={activeItem} onEditTitle={onEditListTitle} onAddTask={onAddTask} />}
+            </div>
         </div>
     );
 }
 
 export default App;
-
-
-
-/*
-[
-    {
-        color: 'green',
-        name: 'Покупки',
-        active: true
-    },
-    {
-        color: 'blue',
-        name: 'Фронтенд'
-    },
-    {
-        color: 'yellow',
-        name: `Задачи`
-    }
-]
-*/
